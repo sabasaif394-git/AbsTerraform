@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure File Uploader</title>
+    <style>
+        body { font-family: sans-serif; padding: 50px; }
+        .container { max-width: 400px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+        button { background-color: #0078d4; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        button:hover { background-color: #005a9e; }
+        #status { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Upload to Azure Storage</h2>
+    <input type="file" id="fileInput" />
+    <br><br>
+    <button onclick="uploadFile()">Upload File</button>
+    <p id="status"></p>
+</div>
+
+<script>
+    async function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        
+        if(fileInput.files.length === 0) {
+            status.textContent = "Please select a file first.";
+            status.style.color = "red";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('myFile', fileInput.files[0]);
+
+        status.textContent = "Uploading...";
+        status.style.color = "black";
+
+        try {
+            // Send file to our local Node.js backend
+            const response = await fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                status.textContent = "Success! File uploaded.";
+                status.style.color = "green";
+                console.log("File URL:", result.url);
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (error) {
+            console.error(error);
+            status.textContent = "Error uploading file.";
+            status.style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>
